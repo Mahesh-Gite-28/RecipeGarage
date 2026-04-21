@@ -1,9 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 
 const RecipeCard = ({ recipe }) => {
+    const navigate = useNavigate();
+
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden w-60 hover:scale-105 transition">
+    <div onClick={()=>{navigate(`/recipe/${recipe._id}`)}} className="bg-white shadow-md rounded-lg overflow-hidden w-60 hover:scale-105 transition">
       
       {/* Image (dummy for now) */}
       <img

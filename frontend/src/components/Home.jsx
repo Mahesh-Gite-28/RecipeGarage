@@ -10,7 +10,6 @@ const Home = () => {
       try {
         const res = await fetch("http://localhost:5000/api/");
         const data = await res.json();
-        console.log(data);
         setRecipes(data.recipes);
       } catch (err) {
         console.log(err);
