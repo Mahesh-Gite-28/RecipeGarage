@@ -6,7 +6,10 @@ const app = express();
 const cors = require("cors");
 
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // ❗ NOT "*"
+  credentials: true               // ❗ REQUIRED for cookies
+}));
 
 const connectDB=require("./config/db.js");
 
