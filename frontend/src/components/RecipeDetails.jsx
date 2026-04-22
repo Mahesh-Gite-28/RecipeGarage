@@ -11,8 +11,9 @@ const RecipeDetails = () => {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Edit Modal State
+  // Modal States
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editForm, setEditForm] = useState({ title: "", ingredients: "", instructions: "", time: "" });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState("");
@@ -35,15 +36,18 @@ const RecipeDetails = () => {
     fetchRecipe();
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this recipe?")) return;
-    
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       const res = await fetch(`${API_BASE}/${id}/delete`, {
         method: "DELETE",
         credentials: "include",
       });
       if (res.ok) {
+        setShowDeleteModal(false);
         navigate("/my-recipes");
       } else {
         alert("Failed to delete recipe");
@@ -123,7 +127,7 @@ const RecipeDetails = () => {
         {/* Header Image Section */}
         <div className="relative h-64 md:h-96">
           <img
-            src={recipe.coverImage || "/dosa.png"}
+            src={recipe.coverImage || "/no.png"}
             alt={recipe.title}
             className="w-full h-full object-cover"
           />
@@ -264,6 +268,35 @@ const RecipeDetails = () => {
                 {editLoading ? "Saving..." : "Save Changes"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+            <div className="bg-red-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">🗑️</span>
+            </div>
+            <h2 className="text-gray-800 text-xl font-bold mb-2">Delete Recipe?</h2>
+            <p className="text-gray-500 text-sm">
+              Are you sure you want to delete this recipe? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-center mt-6">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

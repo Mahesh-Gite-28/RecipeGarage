@@ -45,7 +45,7 @@ const RecipeCard = ({ recipe, manageable = false }) => {
     >
       <div className="relative h-48 overflow-hidden">
         <img
-          src={recipe.coverImage || "/dosa.png"}
+          src={recipe.coverImage || "/no.png"}
           alt={recipe.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />

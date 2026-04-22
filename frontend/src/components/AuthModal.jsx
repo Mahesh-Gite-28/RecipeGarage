@@ -1,13 +1,17 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE } from "../utils/api";
 
-const AuthModal = ({ show, setShow }) => {
-  const [isLogin, setIsLogin] = useState(true);
+const AuthModal = ({ show, setShow, initialMode = "login" }) => {
+  const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [msg, setMsg] = useState("");
   const [isError, setIsError] = useState(false);
   const { login } = useContext(AuthContext);
+
+  useEffect(() => {
+    setIsLogin(initialMode === "login");
+  }, [initialMode, show]);
 
   if (!show) return null;
 
@@ -77,53 +81,67 @@ const AuthModal = ({ show, setShow }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white w-80 p-6 rounded-xl shadow-lg relative">
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+      <div className="bg-white w-full max-w-md p-10 rounded-xl shadow-lg relative">
 
         {/* Close Icon */}
         <button
           onClick={handleClose}
-          className="absolute top-2 right-4 text-gray-500 hover:text-black text-xl"
+          className="absolute top-4 right-6 text-gray-500 hover:text-black text-2xl"
         >
           &times;
         </button>
 
-        <h2 className="text-2xl font-bold text-center mb-4 text-green-700">
+        {/* Decorative Header */}
+        <div className="bg-green-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-3xl">
+          🍽️
+        </div>
+
+        <h2 className="text-2xl font-bold text-center mb-6 text-green-700">
           {isLogin ? "Login" : "Register"}
         </h2>
 
         {!isLogin && (
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={form.username}
-            onChange={handleChange}
-            className="w-full border p-2 mb-3 rounded focus:outline-green-600"
-          />
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-600 mb-1">Username</p>
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={form.username}
+              onChange={handleChange}
+              className="w-full border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-green-600"
+            />
+          </div>
         )}
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded focus:outline-green-600"
-        />
+        <div className="mb-4">
+          <p className="text-sm font-medium text-gray-600 mb-1">Email</p>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-green-600"
+          />
+        </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full border p-2 mb-3 rounded focus:outline-green-600"
-        />
+        <div className="mb-4">
+          <p className="text-sm font-medium text-gray-600 mb-1">Password</p>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full border border-gray-300 px-4 py-3 rounded-lg text-base focus:outline-green-600"
+          />
+        </div>
 
         {msg && (
           <p
-            className={`text-center text-sm mb-3 ${
+            className={`text-center text-sm mb-4 ${
               isError ? "text-red-500" : "text-green-600 font-semibold"
             }`}
           >
@@ -133,12 +151,12 @@ const AuthModal = ({ show, setShow }) => {
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-green-700 text-white py-2 rounded hover:bg-green-800 transition shadow-md"
+          className="w-full bg-green-700 text-white py-3 rounded-lg text-base font-bold hover:bg-green-800 transition shadow-md"
         >
           {isLogin ? "Login" : "Register"}
         </button>
 
-        <p className="text-sm text-center mt-3">
+        <p className="text-sm text-center mt-6">
           {isLogin ? "No account?" : "Already have account?"}
           <span
             onClick={() => {
@@ -151,15 +169,6 @@ const AuthModal = ({ show, setShow }) => {
             {isLogin ? "Register" : "Login"}
           </span>
         </p>
-
-        {/* Optional Close Button */}
-        <button
-          onClick={handleClose}
-          className="mt-3 text-red-500 w-full hover:underline"
-        >
-          Close
-        </button>
-
       </div>
     </div>
   );
