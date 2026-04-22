@@ -31,8 +31,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("authUser");
   };
 
+  const updateFavourites = (newFavourites) => {
+    const updatedUser = { ...user, favourites: newFavourites };
+    setUser(updatedUser);
+    localStorage.setItem("authUser", JSON.stringify(updatedUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateFavourites }}>
       {children}
     </AuthContext.Provider>
   );

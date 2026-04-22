@@ -31,10 +31,10 @@ const Navbar = () => {
           {/* Auth Section */}
           {user ? (
             <div className="flex items-center gap-4">
-              <span className="text-gray-600 italic">{user.email}</span>
+              <span className="text-gray-600 italic font-medium">@{user.username}</span>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 font-semibold"
               >
                 Logout
               </button>

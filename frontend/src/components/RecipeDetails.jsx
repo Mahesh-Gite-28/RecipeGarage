@@ -1,14 +1,23 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE } from "../utils/api";
 
 const RecipeDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(AuthContext);
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Edit Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({ title: "", ingredients: "", instructions: "", time: "" });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  const isManagePage = new URLSearchParams(location.search).get("manage") === "true";
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -35,12 +44,47 @@ const RecipeDetails = () => {
         credentials: "include",
       });
       if (res.ok) {
-        navigate("/");
+        navigate("/my-recipes");
       } else {
         alert("Failed to delete recipe");
       }
     } catch (err) {
       console.error("Delete error", err);
+    }
+  };
+
+  const handleEditOpen = () => {
+    setEditForm({
+      title: recipe.title || "",
+      ingredients: recipe.ingredients || "",
+      instructions: recipe.instructions || "",
+      time: recipe.time || ""
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    setEditError("");
+    try {
+      const res = await fetch(`${API_BASE}/${id}/edit`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(editForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRecipe(data);
+        setShowEditModal(false);
+      } else {
+        setEditError(data.message || "Update failed");
+      }
+    } catch (err) {
+      setEditError("Something went wrong");
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -130,10 +174,10 @@ const RecipeDetails = () => {
           </div>
 
           {/* Actions Section */}
-          {isOwner && (
+          {isOwner && isManagePage && (
             <div className="mt-12 pt-8 border-t border-gray-100 flex gap-4">
               <button 
-                onClick={() => alert("Edit functionality coming soon!")}
+                onClick={handleEditOpen}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-md"
               >
                 Edit Recipe
@@ -148,6 +192,81 @@ const RecipeDetails = () => {
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg relative overflow-y-auto max-h-[90vh]">
+            <button 
+              onClick={() => setShowEditModal(false)}
+              className="absolute top-2 right-4 text-gray-500 hover:text-black text-2xl"
+            >
+              &times;
+            </button>
+
+            <h2 className="text-2xl font-bold text-center mb-6 text-green-700">
+              Edit Recipe
+            </h2>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  required
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients</label>
+                <textarea
+                  required
+                  value={editForm.ingredients}
+                  onChange={(e) => setEditForm({ ...editForm, ingredients: e.target.value })}
+                  placeholder="List ingredients"
+                  className="w-full border p-2 rounded h-24 focus:ring-2 focus:ring-green-500 outline-none"
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
+                <textarea
+                  required
+                  value={editForm.instructions}
+                  onChange={(e) => setEditForm({ ...editForm, instructions: e.target.value })}
+                  placeholder="Step by step instructions"
+                  className="w-full border p-2 rounded h-32 focus:ring-2 focus:ring-green-500 outline-none"
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Preparation Time</label>
+                <input
+                  type="text"
+                  value={editForm.time}
+                  onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
+                  className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
+                />
+              </div>
+
+              {editError && (
+                <p className="text-red-500 text-sm text-center">{editError}</p>
+              )}
+
+              <button
+                disabled={editLoading}
+                type="submit"
+                className="w-full bg-green-700 text-white py-2 rounded font-semibold hover:bg-green-800 transition disabled:bg-gray-400"
+              >
+                {editLoading ? "Saving..." : "Save Changes"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

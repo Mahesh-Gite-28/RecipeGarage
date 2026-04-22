@@ -31,6 +31,12 @@ const Favrecipe = () => {
     fetchFavRecipes();
   }, [user]);
 
+  useEffect(() => {
+    if (user?.favourites) {
+      setRecipes((prev) => prev.filter((r) => user.favourites.includes(r._id)));
+    }
+  }, [user?.favourites]);
+
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">

@@ -3,16 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE } from "../utils/api";
 
-const RecipeCard = ({ recipe }) => {
+const RecipeCard = ({ recipe, manageable = false }) => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
-  const [isFav, setIsFav] = useState(false);
+  const { user, updateFavourites } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (user && user.favourites) {
-      setIsFav(user.favourites.includes(recipe._id));
-    }
-  }, [user, recipe._id]);
+  const isFav = user?.favourites?.includes(recipe._id) ?? false;
 
   const toggleFav = async (e) => {
     e.stopPropagation();
@@ -26,18 +21,26 @@ const RecipeCard = ({ recipe }) => {
         method: "POST",
         credentials: "include",
       });
+      const data = await res.json();
       if (res.ok) {
-        setIsFav(!isFav);
-        // Note: In a real app, we might want to update the global AuthContext user object here
+        updateFavourites(data.favourites);
       }
     } catch (err) {
       console.error("Error toggling favourite", err);
     }
   };
 
+  const handleClick = () => {
+    if (manageable) {
+      navigate(`/recipe/${recipe._id}?manage=true`);
+    } else {
+      navigate(`/recipe/${recipe._id}`);
+    }
+  };
+
   return (
     <div 
-      onClick={() => navigate(`/recipe/${recipe._id}`)} 
+      onClick={handleClick} 
       className="bg-white shadow-lg rounded-xl overflow-hidden w-full hover:shadow-2xl transition-all duration-300 cursor-pointer group"
     >
       <div className="relative h-48 overflow-hidden">
