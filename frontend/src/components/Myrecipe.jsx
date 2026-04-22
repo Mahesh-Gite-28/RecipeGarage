@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import RecipeCard from "./RecipeCard";
+import AddRecipeModal from "./AddRecipeModal";
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE } from "../utils/api";
 
@@ -7,29 +8,29 @@ const Myrecipe = () => {
   const { user } = useContext(AuthContext);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  useEffect(() => {
+  const fetchMyRecipes = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
     }
-
-    const fetchMyRecipes = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/myRecipe`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-        setRecipes(data.recipes || []);
-      } catch (err) {
-        console.error("Error fetching my recipes", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMyRecipes();
+    try {
+      const res = await fetch(`${API_BASE}/myRecipe`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      setRecipes(data.recipes || []);
+    } catch (err) {
+      console.error("Error fetching my recipes", err);
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    fetchMyRecipes();
+  }, [fetchMyRecipes]);
 
   if (!user) {
     return (
@@ -47,8 +48,16 @@ const Myrecipe = () => {
     <div className="px-6 md:px-10 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">My Recipes</h1>
-        <div className="bg-green-100 text-green-800 px-4 py-1 rounded-full font-semibold">
-          {recipes.length} {recipes.length === 1 ? 'Recipe' : 'Recipes'}
+        <div className="flex items-center gap-3">
+          <div className="bg-green-100 text-green-800 px-4 py-1 rounded-full font-semibold">
+            {recipes.length} {recipes.length === 1 ? 'Recipe' : 'Recipes'}
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-green-700 text-white px-5 py-2 rounded-full font-semibold hover:bg-green-800 transition shadow-md"
+          >
+            + Share Recipe
+          </button>
         </div>
       </div>
 
@@ -61,7 +70,12 @@ const Myrecipe = () => {
         <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
           <div className="text-5xl mb-4">🍳</div>
           <p className="text-xl text-gray-500 font-medium mb-4">You haven't shared any recipes yet.</p>
-          <p className="text-gray-400">Click the "Share your recipe" button on the home page to get started!</p>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-green-700 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-800 transition"
+          >
+            Share your first recipe!
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -70,6 +84,12 @@ const Myrecipe = () => {
           ))}
         </div>
       )}
+
+      <AddRecipeModal
+        show={showAddModal}
+        setShow={setShowAddModal}
+        onRecipeAdded={fetchMyRecipes}
+      />
     </div>
   );
 };

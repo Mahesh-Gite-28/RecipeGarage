@@ -10,6 +10,7 @@ const AddRecipeModal = ({ show, setShow, onRecipeAdded }) => {
     instructions: "",
     time: ""
   });
+  const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -25,12 +26,18 @@ const AddRecipeModal = ({ show, setShow, onRecipeAdded }) => {
     setError("");
 
     try {
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("ingredients", form.ingredients);
+      formData.append("instructions", form.instructions);
+      formData.append("time", form.time);
+      if (imageFile) {
+        formData.append("coverImage", imageFile);
+      }
+
       const res = await fetch(`${API_BASE}/addRecipe`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+        body: formData,
         credentials: "include",
       });
 
@@ -40,6 +47,7 @@ const AddRecipeModal = ({ show, setShow, onRecipeAdded }) => {
         onRecipeAdded();
         setShow(false);
         setForm({ title: "", ingredients: "", instructions: "", time: "" });
+        setImageFile(null);
       } else {
         setError(data.message || "Failed to add recipe");
       }
@@ -112,6 +120,25 @@ const AddRecipeModal = ({ show, setShow, onRecipeAdded }) => {
               placeholder="e.g. 30 mins"
               className="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image (optional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files[0])}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+            />
+            {imageFile && (
+              <div className="mt-2">
+                <img
+                  src={URL.createObjectURL(imageFile)}
+                  alt="Preview"
+                  className="h-32 w-full object-cover rounded-lg border"
+                />
+              </div>
+            )}
           </div>
 
           {error && (

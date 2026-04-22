@@ -65,6 +65,7 @@ const addRecipe = async (req, res) => {
       instructions,
       time,
       createdBy: req.user.id,
+      coverImage: req.file ? req.file.path : undefined,
     });
     return res.status(201).json(newRecipe);
   } catch (err) {
